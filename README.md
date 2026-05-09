@@ -1,6 +1,6 @@
-# Catalog Produse — SoftPrim Technology
+# API Catalog Produse — SoftPrim Technology
 
-Aplicație web full-stack pentru afișarea și filtrarea unui catalog de produse electrice.
+API REST funcțional pentru un sistem de catalog produse și plasare comenzi, conectat la MySQL.
 
 ---
 
@@ -10,22 +10,20 @@ Aplicație web full-stack pentru afișarea și filtrarea unui catalog de produse
 |---|---|
 | Backend | Node.js v24.15.0 + Express |
 | Bază de date | MariaDB 10.4 (prin XAMPP) |
-| Frontend | HTML + CSS + JavaScript vanilla |
+| Format API | JSON, encoding UTF-8 |
 
 ---
 
 ## Structura proiectului
 
 ```
-softprim/
-├── backend/
-│   ├── index.js          # Serverul Express + endpoint-urile API
-│   ├── package.json
-│   └── node_modules/
-├── frontend/
-│   └── index.html        # Interfața web
-├── setup.sql             # Schema + datele bazei de date
-└── README.md
+backend/
+├── index.js          # Serverul Express + toate endpoint-urile
+├── package.json
+├── package-lock.json
+└── node_modules/
+setup.sql             # Schema + datele bazei de date
+README.md
 ```
 
 ---
@@ -65,65 +63,108 @@ Dacă ai o parolă diferită pentru MySQL, modifică câmpul `password`.
 
 ---
 
-## Pornire
+## Pornire server
 
-### 1. Pornește baza de date
-Deschide XAMPP Control Panel și apasă **Start** lângă **Apache** și **MySQL**.
-
-### 2. Pornește backend-ul
 ```bash
 cd backend
 node index.js
 ```
+
 Serverul pornește pe **http://localhost:3000**
 
-### 3. Deschide frontend-ul
-Deschide fișierul `frontend/index.html` direct în browser (dublu click).
-
 ---
 
-## Exemple de apel API
+## Endpoint-uri
 
-**Toate categoriile:**
-```bash
-curl http://localhost:3000/api/categories
-```
+### GET /api/products
 
-**Toate produsele:**
+Returnează toate produsele cu denumirea categoriei. Suportă filtrare opțională după `category_id`.
+
 ```bash
+# Toate produsele
 curl http://localhost:3000/api/products
-```
 
-**Produse filtrate după categorie:**
-```bash
+# Produse filtrate după categorie
 curl http://localhost:3000/api/products?category_id=1
-```
 
-**Category_id invalid (răspuns 400):**
-```bash
+# Răspuns așteptat — 200 OK:
+[
+  {
+    "id": 1,
+    "name": "Siguranță automată 1P+N 16A curba C",
+    "price": "45.50",
+    "stock": 120,
+    "category_id": 1,
+    "category_name": "Întrerupătoare automate"
+  }
+]
+
+# category_id invalid — 400 Bad Request:
 curl http://localhost:3000/api/products?category_id=abc
+{ "error": "category_id invalid" }
 ```
 
 ---
 
-## Funcționalități implementate
+### GET /api/products/:id
 
-- Afișare catalog complet de produse în format grid
-- Filtrare dinamică după categorie prin butoane
-- Denumirea categoriei afișată pe fiecare produs (JOIN între `products` și `categories`)
-- Prețuri formatate cu 2 zecimale și sufix RON
-- Produse cu stoc 0 afișate estompat cu badge „Stoc epuizat"
-- Stare de încărcare (skeleton animation)
-- Stare de eroare cu buton de reîncercare
-- Stare de listă goală
-- Design responsive (funcționează pe mobil de la 375px)
-- CORS configurat pentru frontend pe origin diferit
+Returnează detaliile unui singur produs după id.
+
+```bash
+# Produs existent
+curl http://localhost:3000/api/products/1
+
+# Răspuns așteptat — 200 OK:
+{
+  "id": 1,
+  "name": "Siguranță automată 1P+N 16A curba C",
+  "price": "45.50",
+  "stock": 120,
+  "category_id": 1,
+  "category_name": "Întrerupătoare automate",
+  "created_at": "2026-05-07T11:02:30.000Z"
+}
+
+# Produs inexistent — 404 Not Found:
+curl http://localhost:3000/api/products/999
+{ "error": "Produsul nu există" }
+
+# Id invalid — 400 Bad Request:
+curl http://localhost:3000/api/products/abc
+{ "error": "id invalid" }
+```
+
+---
+
+### POST /api/orders
+
+Creează o comandă nouă și scade cantitatea din stocul produsului. Operația se face într-o tranzacție SQL — dacă oricare dintre pași eșuează, stocul rămâne neschimbat.
+
+Totalul comenzii se calculează pe server (`price × quantity`), nu se preia din cerere.
+
+```bash
+curl -X POST http://localhost:3000/api/orders \
+  -H "Content-Type: application/json" \
+  -d '{"product_id": 1, "quantity": 2, "customer_email": "client@exemplu.ro"}'
+
+# Răspuns așteptat — 201 Created:
+{
+  "order_id": 1,
+  "product_id": 1,
+  "quantity": 2,
+  "total": 91,
+  "created_at": "2026-05-09T17:57:01.000Z"
+}
+
+# Produs inexistent — 404 Not Found
+# Stoc insuficient — 400 Bad Request
+# Email invalid — 400 Bad Request
+```
 
 ---
 
 ## Decizii tehnice
 
-- **Node.js + Express** — ales pentru simplitate și pentru că permite folosirea JavaScript atât în backend cât și în frontend
-- **Vanilla JS în frontend** — fără framework, pentru a păstra dependențele minime și timpul de setup redus
-- **Skeleton loading** în loc de spinner — experiență vizuală mai plăcută la încărcarea inițială
-- Validarea `category_id` returnează **400 Bad Request** pentru orice valoare non-numerică sau negativă, conform cerințelor
+- **Node.js + Express** — ales pentru simplitate și setup rapid
+- **Tranzacție SQL** (`beginTransaction` / `commit` / `rollback`) pentru atomicitate la plasarea comenzilor — dacă inserarea în `orders` sau actualizarea stocului eșuează, întreaga operație este anulată
+- Validările sunt făcute înainte de orice query la baza de date, pentru a evita operații inutile

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catalog Produse — SoftPrim</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f4f0;
+      --surface: #ffffff;
+      --border: #e2e0d8;
+      --text: #1a1916;
+      --text-muted: #7a786e;
+      --accent: #d4501a;
+      --accent-light: #fdf0eb;
+      --tag-bg: #eeecea;
+      --out-of-stock: #c0bdb4;
+      --radius: 10px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.07);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header .logo {
+      font-family: 'DM Mono', monospace;
+      font-size: 18px;
+      font-weight: 500;
+      letter-spacing: -0.5px;
+      color: var(--accent);
+    }
+
+    header .logo span { color: var(--text); }
+
+    header h1 {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-muted);
+      border-left: 1px solid var(--border);
+      padding-left: 12px;
+      margin-left: 4px;
+    }
+
+    /* MAIN LAYOUT */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    /* FILTER BAR */
+    .filter-bar {
+      margin-bottom: 28px;
+    }
+
+    .filter-bar label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .filter-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filter-btn {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 100px;
+      padding: 7px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .filter-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* RESULTS BAR */
+    .results-bar {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      min-height: 20px;
+    }
+
+    /* GRID */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    /* PRODUCT CARD */
+    .product-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    .product-card.out-of-stock {
+      opacity: 0.6;
+    }
+
+    .product-card .category-tag {
+      display: inline-block;
+      background: var(--tag-bg);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 9px;
+      border-radius: 100px;
+      letter-spacing: 0.02em;
+      width: fit-content;
+    }
+
+    .product-card .name {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .product-card.out-of-stock .name {
+      color: var(--out-of-stock);
+    }
+
+    .product-card .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 4px;
+    }
+
+    .product-card .price {
+      font-family: 'DM Mono', monospace;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--accent);
+    }
+
+    .product-card.out-of-stock .price {
+      color: var(--out-of-stock);
+    }
+
+    .product-card .stock {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .out-of-stock-badge {
+      display: inline-block;
+      background: #f0ede8;
+      color: var(--out-of-stock);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 100px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* STATES */
+    .state-container {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 64px 24px;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .state-icon { font-size: 36px; }
+
+    .state-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .state-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .retry-btn {
+      margin-top: 8px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 100px;
+      padding: 8px 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .retry-btn:hover { opacity: 0.85; }
+
+    /* SKELETON */
+    .skeleton {
+      background: linear-gradient(90deg, #ece9e3 25%, #f5f2ed 50%, #ece9e3 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 6px;
+    }
+
+    .skeleton-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 480px) {
+      header { padding: 16px 20px; }
+      header h1 { display: none; }
+      main { padding: 24px 16px; }
+      .products-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Soft<span>Prim</span></div>
+  <h1>Catalog Produse</h1>
+</header>
+
+<main>
+
+  <div class="filter-bar">
+    <label>Categorie</label>
+    <div class="filter-buttons" id="filterButtons">
+      <button class="filter-btn active" data-id="">Toate categoriile</button>
+    </div>
+  </div>
+
+  <div class="results-bar" id="resultsBar"></div>
+
+  <div class="products-grid" id="productsGrid"></div>
+
+</main>
+
+<script>
+  const API = 'http://localhost:3000';
+  let selectedCategory = '';
+
+  // ---- UTILITIES ----
+
+  function showSkeletons(count = 8) {
+    const grid = document.getElementById('productsGrid');
+    grid.innerHTML = Array(count).fill('').map(() => `
+      <div class="skeleton-card">
+        <div class="skeleton" style="height:18px;width:60%"></div>
+        <div class="skeleton" style="height:14px;width:90%"></div>
+        <div class="skeleton" style="height:14px;width:75%"></div>
+        <div class="skeleton" style="height:20px;width:40%;margin-top:8px"></div>
+      </div>
+    `).join('');
+  }
+
+  function showError(message, onRetry) {
+    const grid = document.getElementById('productsGrid');
+    grid.innerHTML = `
+      <div class="state-container">
+        <div class="state-icon">⚠️</div>
+        <div class="state-title">Ceva n-a mers</div>
+        <div class="state-sub">${message}</div>
+        <button class="retry-btn" id="retryBtn">Încearcă din nou</button>
+      </div>
+    `;
+    document.getElementById('retryBtn').addEventListener('click', onRetry);
+  }
+
+  function showEmpty() {
+    const grid = document.getElementById('productsGrid');
+    grid.innerHTML = `
+      <div class="state-container">
+        <div class="state-icon">📭</div>
+        <div class="state-title">Niciun produs găsit</div>
+        <div class="state-sub">Nu există produse în această categorie.</div>
+      </div>
+    `;
+  }
+
+  function formatPrice(price) {
+    return parseFloat(price).toFixed(2) + ' RON';
+  }
+
+  // ---- CATEGORIES ----
+
+  async function loadCategories() {
+    try {
+      const res = await fetch(`${API}/api/categories`);
+      const categories = await res.json();
+      const container = document.getElementById('filterButtons');
+
+      categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn';
+        btn.dataset.id = cat.id;
+        btn.textContent = cat.name;
+        btn.addEventListener('click', () => selectCategory(cat.id));
+        container.appendChild(btn);
+      });
+    } catch (e) {
+      console.error('Eroare la încărcarea categoriilor:', e);
+    }
+  }
+
+  function selectCategory(id) {
+    selectedCategory = id;
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.id == id);
+    });
+
+    loadProducts();
+  }
+
+  // ---- PRODUCTS ----
+
+  async function loadProducts() {
+    showSkeletons();
+    document.getElementById('resultsBar').textContent = '';
+
+    const url = selectedCategory
+      ? `${API}/api/products?category_id=${selectedCategory}`
+      : `${API}/api/products`;
+
+    try {
+      const res = await fetch(url);
+
+      if (!res.ok) {
+        showError('Răspuns invalid de la server.', loadProducts);
+        return;
+      }
+
+      const products = await res.json();
+      renderProducts(products);
+    } catch (e) {
+      showError('Nu se poate conecta la server. Asigură-te că backend-ul rulează.', loadProducts);
+    }
+  }
+
+  function renderProducts(products) {
+    const grid = document.getElementById('productsGrid');
+    const resultsBar = document.getElementById('resultsBar');
+
+    if (products.length === 0) {
+      showEmpty();
+      resultsBar.textContent = '';
+      return;
+    }
+
+    resultsBar.textContent = `${products.length} ${products.length === 1 ? 'produs' : 'produse'}`;
+
+    grid.innerHTML = products.map(p => {
+      const outOfStock = p.stock === 0;
+      return `
+        <div class="product-card ${outOfStock ? 'out-of-stock' : ''}">
+          <span class="category-tag">${p.category_name}</span>
+          <div class="name">${p.name}</div>
+          <div class="footer">
+            <div class="price">${formatPrice(p.price)}</div>
+            ${outOfStock
+              ? `<span class="out-of-stock-badge">Stoc epuizat</span>`
+              : `<span class="stock">${p.stock} buc.</span>`
+            }
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ---- INIT ----
+  loadCategories();
+  loadProducts();
+</script>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-# API Catalog Produse — SoftPrim Technology
+# Product Catalog Full-Stack App
 
 API REST funcțional pentru un sistem de catalog produse și plasare comenzi, conectat la MySQL.
 
@@ -34,7 +34,7 @@ README.md
 
 1. Instalează [XAMPP](https://www.apachefriends.org/) și pornește **Apache** și **MySQL** din panoul de control
 2. Deschide [localhost/phpmyadmin](http://localhost/phpmyadmin)
-3. Creează o bază de date nouă numită `softprim_test` cu colație `utf8mb4_unicode_ci`
+3. Creează o bază de date nouă numită `product_catalog_db` cu colație `utf8mb4_unicode_ci`
 4. Selectează baza de date, mergi la tab-ul **Import** și importă fișierul `setup.sql`
 
 ### 2. Backend
@@ -55,7 +55,7 @@ const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: '',           // implicit gol în XAMPP
-    database: 'softprim_test'
+    database: 'product_catalog_db'
 });
 ```
 

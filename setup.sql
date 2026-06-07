@@ -1,10 +1,9 @@
 -- ============================================================
--- SoftPrim Technology SRL — Exercițiu tehnic stagiu
--- Setup bază de date MySQL
+- Product Catalog — Setup bază de date MySQL
 -- ============================================================
 -- Instrucțiuni:
---   1. Creează baza de date:  CREATE DATABASE softprim_test;
---   2. Importă acest fișier:  mysql -u root -p softprim_test < setup.sql
+--   1. Creează baza de date:  CREATE DATABASE product_catalog_db;
+--   2. Importă acest fișier:  mysql -u root -p product_catalog_db;
 -- ============================================================
 
 SET NAMES utf8mb4;

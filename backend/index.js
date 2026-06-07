@@ -11,7 +11,7 @@ const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: '',
-    database: 'softprim_test'
+    database: 'product_catalog_db'
 });
 
 db.connect((err) => {
